@@ -90,13 +90,13 @@ class AmazonECS
 	/**
 	 * Look for products in a specific category
 	 * 
-	 * @param  string $query
+	 * @param  string $category
 	 * @return response
 	 */
-	public function category($category)
+	public function category($category, $browse_node)
 	{
 		//$query		= rawurlencode($query);
-		$params 	= $this->params(['Keywords' => $query, 'SearchIndex' => $category, 'ResponseGroup' => $this->response_group]);
+		$params 	= $this->params(['SearchIndex' => $category, 'BrowseNode' => $browse_node ,'ResponseGroup' => $this->response_group]);
 		$string 	= $this->buildString($params);
 		$signature 	= $this->signString($string);
 		$url 		= $this->url($params, $signature);
