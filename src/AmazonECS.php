@@ -5,7 +5,7 @@ namespace Dawson\AmazonECS;
 use InvalidArgumentException;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\TransferException;
 
 class AmazonECS
 {
@@ -50,18 +50,18 @@ class AmazonECS
 	 * @param  string $query
 	 * @return response
 	 */
-	public function search($query)
+	public function search($query, $page)
 	{
 		$query		= rawurlencode($query);
-		$params 	= $this->params(['Keywords' => $query, 'SearchIndex' => config('amazon.search_index'), 'ResponseGroup' => $this->response_group]);
+		$params 	= $this->params(['Keywords' => $query, 'ItemPage' => $page ,'SearchIndex' => config('amazon.search_index'), 'ResponseGroup' => $this->response_group]);
 		$string 	= $this->buildString($params);
 		$signature 	= $this->signString($string);
 		$url 		= $this->url($params, $signature);
 
 		try {
-			$this->response = $this->client->get($url)->getBody();
-			return $this;
-		} catch(ClientException $e) {
+			$response = $this->client->get($url);
+			return $response;
+		} catch(TransferException $e) {
 			return $e->getResponse();
 		}
 	}
@@ -80,9 +80,8 @@ class AmazonECS
 		$url 		= $this->url($params, $signature);
 
 		try {
-			$this->response = $this->client->get($url)->getBody();
-			return $this;
-		} catch(ClientException $e) {
+			return $this->client->get($url);
+		} catch(TransferException $e) {
 			return $e->getResponse();
 		}
 	}
@@ -93,40 +92,39 @@ class AmazonECS
 	 * @param  string $category
 	 * @return response
 	 */
-	public function category($category, $browse_node)
+	public function category($category, $browse_node, $page)
 	{
-		//$query		= rawurlencode($query);
-		$params 	= $this->params(['SearchIndex' => $category, 'BrowseNode' => $browse_node ,'ResponseGroup' => $this->response_group]);
+		$params 	= $this->params(['SearchIndex' => $category, 'ItemPage' => $page, 'BrowseNode' => $browse_node ,'ResponseGroup' => $this->response_group]);
 		$string 	= $this->buildString($params);
 		$signature 	= $this->signString($string);
 		$url 		= $this->url($params, $signature);
 
 		try {
-			$this->response = $this->client->get($url)->getBody();
-			return $this;
-		} catch(ClientException $e) {
+			return $this->client->get($url);
+		} catch(TransferException $e) {
 			return $e->getResponse();
 		}
 	}
 
 	/**
-	 * Returns the response as XML
-	 * 
-	 * @return Response
+	 * Returns the response as SimpleXMLElement
+	 *
+	 * @param Response
+	 * @return SimpleXMLElement
 	 */
-	public function xml()
+	public function xml($response)
 	{
-		return simplexml_load_string($this->response);
+		return simplexml_load_string($response);
 	}
 
 	/**
 	 * Returns the response as JSON
-	 * 
-	 * @return Response
+	 * @param Response
+	 * @return Array
 	 */
-	public function json()
+	public function json($response)
 	{
-		$xml  = simplexml_load_string($this->response);
+		$xml  = simplexml_load_string($response);
 		$json = json_encode($xml);
 		$json = json_decode($json, true);
 

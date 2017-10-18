@@ -15,7 +15,7 @@ class AmazonECSServiceProvider extends ServiceProvider
 	{
 		$this->publishes([
 			__DIR__.'/../config/amazon.php' => config_path('amazon.php'),
-		], 'config');
+		]);
 	}
 	
 	/**
