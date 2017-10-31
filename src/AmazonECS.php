@@ -74,7 +74,7 @@ class AmazonECS
 	 */
 	public function lookup($id)
 	{
-		$params 	= $this->params(['ItemId' => $id, 'ResponseGroup' =>  'Images,ItemAttributes,VariationImages'], 'ItemLookup');
+		$params 	= $this->params(['ItemId' => $id, 'ResponseGroup' =>  'Images,ItemAttributes,VariationImages,Reviews,Similarities', 'IncludeReviewsSummary' => 'True'], 'ItemLookup');
 		$string 	= $this->buildString($params);
 		$signature 	= $this->signString($string);
 		$url 		= $this->url($params, $signature);
@@ -125,7 +125,7 @@ class AmazonECS
 	public function json($response)
 	{
 		$xml  = simplexml_load_string($response);
-		$json = json_encode($xml);
+		$json = json_encode($xml, JSON_NUMERIC_CHECK);
 		$json = json_decode($json, true);
 
 		return $json;
